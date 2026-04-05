@@ -1,0 +1,68 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "A user in the system (admin, profesor, alumno)",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "profesor", "alumno"] }
+      },
+      "required": ["email", "displayName", "role"]
+    },
+    "Materia": {
+      "title": "Materia",
+      "description": "A subject taught by a teacher",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "teacherId": { "type": "string" }
+      },
+      "required": ["name", "teacherId"]
+    },
+    "Curso": {
+      "title": "Curso",
+      "description": "A course containing students, linked to a materia",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "materiaId": { "type": "string" },
+        "studentIds": { "type": "array", "items": { "type": "string" } },
+        "visibleClasses": { "type": "number" }
+      },
+      "required": ["name", "materiaId", "studentIds", "visibleClasses"]
+    },
+    "Plan": {
+      "title": "Plan",
+      "description": "The annual plan for a materia",
+      "type": "object",
+      "properties": {
+        "materiaId": { "type": "string" },
+        "teacherId": { "type": "string" },
+        "input": { "type": "object" },
+        "plan": { "type": "object" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["materiaId", "teacherId", "input", "plan", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Users collection"
+    },
+    "/materias/{materiaId}": {
+      "schema": "Materia",
+      "description": "Materias collection"
+    },
+    "/cursos/{cursoId}": {
+      "schema": "Curso",
+      "description": "Cursos collection"
+    },
+    "/plans/{planId}": {
+      "schema": "Plan",
+      "description": "Plans collection"
+    }
+  }
+}

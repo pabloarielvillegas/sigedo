@@ -1,0 +1,67 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    // Collection: users
+    //   - email: string
+    //   - displayName: string
+    //   - role: string ('admin', 'profesor', 'alumno')
+    // Collection: materias
+    //   - name: string
+    //   - teacherId: string
+    // Collection: cursos
+    //   - name: string
+    //   - materiaId: string
+    //   - studentIds: list of strings
+    //   - visibleClasses: number
+    // Collection: plans
+    //   - materiaId: string
+    //   - teacherId: string
+    //   - input: map
+    //   - plan: map
+    //   - updatedAt: string
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    function isAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.email == "pabloarielvillegaslg@gmail.com" ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+      );
+    }
+    function isProfesor() {
+      return isAuthenticated() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'profesor';
+    }
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(userId) && request.resource.data.role == 'alumno';
+      allow update: if isAdmin() || (isOwner(userId) && request.resource.data.role == resource.data.role);
+      allow delete: if isAdmin();
+    }
+
+    match /materias/{materiaId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAdmin() || isProfesor();
+    }
+
+    match /cursos/{cursoId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAdmin() || isProfesor();
+    }
+
+    match /plans/{planId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAdmin() || isProfesor();
+    }
+  }
+}

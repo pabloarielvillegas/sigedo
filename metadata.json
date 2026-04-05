@@ -1,0 +1,5 @@
+{
+  "name": "Planificador Docente IA",
+  "description": "Sistema inteligente para generar planificaciones anuales estructuradas (3 trimestres, 48 clases) a partir de programas y bibliografías.",
+  "requestFramePermissions": []
+}
